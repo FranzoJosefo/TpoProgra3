@@ -46,10 +46,34 @@ public class EncontrarOpsInterfaceImpl implements EncontrarOperacionesInterface 
 
                     System.out.println("Evaluo expresion parcial antes de PODA:" + expresion + number);
                     if (evaluateExpression(expresion + number) == resultadoEsperado && !restoOperadores.isEmpty() && !restoNumeros.isEmpty()) { //Poda, si ya llegue parcialmente al resultadoEsperado
-                        if (restoOperadores.get(0) == Operadores.SUMA && restoNumeros.get(0) > 0
-                                || restoOperadores.get(0) == Operadores.MULTI && restoNumeros.get(0) > 1) {
+                        Integer numeroSiguiente = restoNumeros.get(0);
+                        Operadores operadorSiguiente = restoOperadores.get(0);
+                        if (operadorSiguiente == Operadores.SUMA && numeroSiguiente > 0
+                                || operadorSiguiente == Operadores.MULTI && numeroSiguiente > 1) {
                             System.out.println("PODO no pruebo las siguientes");
                             return resultadoFinal;
+                        }
+                    }
+                    //Tambien si es el ultimo operador que voy a agregar, antes de checkearlo, podria verificar si ya llegue al resultado. Si estoy en 10, ya sea que hago DIV/MULTI/RESTA/etc (evaluar cada caso) deberia cortar!.
+                    if (restoOperadores.size() == 1) { //TODO REVISAR BIEN ESTO, PERO CREO QUE ESTA BIEN! - PODA
+                        if (evaluateExpression(expresion + number) == resultadoEsperado && !restoOperadores.isEmpty() && !restoNumeros.isEmpty()) { //Poda, si ya llegue parcialmente al resultadoEsperado
+                            Integer numeroSiguiente = restoNumeros.get(0);
+                            Operadores operadorSiguiente = restoOperadores.get(0);
+                            boolean esEpresionInvalida = operadorSiguiente == Operadores.SUMA && numeroSiguiente > 0
+                                    || operadorSiguiente == Operadores.MULTI && numeroSiguiente > 1
+                                    || operadorSiguiente == Operadores.DIV && numeroSiguiente != 1
+                                    || operadorSiguiente == Operadores.RESTA && numeroSiguiente > 0;
+                            if(restoNumeros.size() == 1) { //Ultimo numero disponible a revisar
+                                if (esEpresionInvalida) {
+                                    System.out.println("PODO no pruebo las siguientes");
+                                    return resultadoFinal;
+                                }
+                            } else {
+                                if (esEpresionInvalida) { //Quedan otros numeros por revisar
+                                    System.out.println("PODO parcial, no pruebo el numero siguiente.");
+                                    restoNumeros.remove(0);
+                                }
+                            }
                         }
                     }
 
