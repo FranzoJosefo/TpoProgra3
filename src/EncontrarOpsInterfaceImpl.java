@@ -4,10 +4,17 @@ public class EncontrarOpsInterfaceImpl implements EncontrarOperacionesInterface 
 
     @Override
     public ArrayList<String> obtenerOperaciones(ArrayList<Integer> numeros, ArrayList<Operadores> operadores, int cantNum, int resultadoABuscar) {
-        if(cantNum < operadores.size() + 1 || numeros.size() < operadores.size() + 1) {
+        if (cantNum < operadores.size() + 1 || numeros.size() < operadores.size() + 1) {
             return null;
         }
-        //TODO reducir el array Numeros acorde a cantNum
+        //Consideramos que cantNum reducira el tamaño del array numeros original, en caso de que este sea mayor.
+        if (numeros.size() > cantNum) {
+            ArrayList<Integer> numerosFiltrados = new ArrayList<Integer>();
+            for (int i = 0; i < cantNum; i++) {
+                numerosFiltrados.add(numeros.get(i));
+            }
+            return obtenerOperaciones(numerosFiltrados, operadores, resultadoABuscar, "", new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        }
         return obtenerOperaciones(numeros, operadores, resultadoABuscar, "", new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
     }
 
@@ -123,7 +130,7 @@ public class EncontrarOpsInterfaceImpl implements EncontrarOperacionesInterface 
             }
 
             i = 0;
-            while (i < operadores.size()) { // K = o(2*n) donde n son los operadores. Peor caso es all SUMA y RESTA porque entra las 2 veces con la misma cantidad de operadores. El 2 -> lo saco me queda o(n) entonces K = 1
+            while (i < operadores.size()) { // K = o(2*n) donde n son los operadores. Peor caso es all SUMA y RESTA porque entra las 2 veces con la misma cantidad de operadores. El o(2n) el exponente de n es 1, entonces K = 1
                 switch (operadores.get(i)) {
                     case SUMA: {
                         INodo operandoA = operaciones.remove(i);
