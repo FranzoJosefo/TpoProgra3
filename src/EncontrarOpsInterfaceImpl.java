@@ -34,7 +34,7 @@ public class EncontrarOpsInterfaceImpl implements EncontrarOperacionesInterface 
             String nuevaExpresion = expresion + numeros.get(0);
             System.out.println("nueva expresoion: " + nuevaExpresion);
             numeros.remove(0); // Saco el numero ya revisado.
-            if (evaluarExpresion(operadoresSolucion, operandosSolucionAux) == resultadoEsperado) {
+            if (evaluarExpresions(operadoresSolucion, operandosSolucionAux) == resultadoEsperado) {
                 resultadoFinal.add(nuevaExpresion);
             }
         }
@@ -45,7 +45,7 @@ public class EncontrarOpsInterfaceImpl implements EncontrarOperacionesInterface 
                 System.out.println("nueva expresoion: " + nuevaExpresion);
                 ArrayList<Integer> operandosSolucionAux = new ArrayList<>(operandosSolucion);
                 operandosSolucionAux.add(numeros.get(0));
-                if (evaluarExpresion(operadoresSolucion, operandosSolucionAux) == resultadoEsperado) {
+                if (evaluarExpresions(operadoresSolucion, operandosSolucionAux) == resultadoEsperado) {
                     resultadoFinal.add(nuevaExpresion);
                 }
             } else { //Todavia quedan operadores
@@ -97,29 +97,24 @@ public class EncontrarOpsInterfaceImpl implements EncontrarOperacionesInterface 
         return operator;
     }
 
-    private static int evaluarExpresion(ArrayList<Operadores> operadores, ArrayList<Integer> operandos) { //2*4+8/1-5 - *, +, -, - // Operandos: 2,3,
+    private static int evaluarExpresions(ArrayList<Operadores> operadores, ArrayList<Integer> operandos) {
         if (operandos.size() == operadores.size() + 1) {
-
-
-            ArrayList<INodo> operaciones = new ArrayList<>(); //2, 4, 8, 1, 5
-            for (Integer operando : operandos) {
-                operaciones.add(new NodoOperando(operando));
-            }
+            ArrayList<Integer> operaciones = new ArrayList<>(operandos); // Copy operandos to operaciones
             int i = 0;
-            while (i < operadores.size()) { // NodoMulti, NodoDivi, 5
+            while (i < operadores.size()) {
                 switch (operadores.get(i)) {
                     case MULTI: {
-                        INodo operandoA = operaciones.remove(i);
-                        INodo operandoB = operaciones.remove(i);
+                        int operandoA = operaciones.remove(i);
+                        int operandoB = operaciones.remove(i);
                         operadores.remove(i);
-                        operaciones.add(i, new NodoOperadorMultiplicacion(operandoA, operandoB));
+                        operaciones.add(i, operandoA * operandoB);
                         break;
                     }
                     case DIV: {
-                        INodo operandoA = operaciones.remove(i);
-                        INodo operandoB = operaciones.remove(i);
+                        int operandoA = operaciones.remove(i);
+                        int operandoB = operaciones.remove(i);
                         operadores.remove(i);
-                        operaciones.add(i, new NodoOperadorDivision(operandoA, operandoB));
+                        operaciones.add(i, operandoA / operandoB);
                         break;
                     }
                     default: {
@@ -130,20 +125,20 @@ public class EncontrarOpsInterfaceImpl implements EncontrarOperacionesInterface 
             }
 
             i = 0;
-            while (i < operadores.size()) { // K = o(2*n) donde n son los operadores. Peor caso es all SUMA y RESTA porque entra las 2 veces con la misma cantidad de operadores. El o(2n) el exponente de n es 1, entonces K = 1
+            while (i < operadores.size()) {
                 switch (operadores.get(i)) {
                     case SUMA: {
-                        INodo operandoA = operaciones.remove(i);
-                        INodo operandoB = operaciones.remove(i);
+                        int operandoA = operaciones.remove(i);
+                        int operandoB = operaciones.remove(i);
                         operadores.remove(i);
-                        operaciones.add(i, new NodoOperadorSuma(operandoA, operandoB));
+                        operaciones.add(i, operandoA + operandoB);
                         break;
                     }
                     case RESTA: {
-                        INodo operandoA = operaciones.remove(i);
-                        INodo operandoB = operaciones.remove(i);
+                        int operandoA = operaciones.remove(i);
+                        int operandoB = operaciones.remove(i);
                         operadores.remove(i);
-                        operaciones.add(i, new NodoOperadorResta(operandoA, operandoB));
+                        operaciones.add(i, operandoA - operandoB);
                         break;
                     }
                     default: {
@@ -153,89 +148,8 @@ public class EncontrarOpsInterfaceImpl implements EncontrarOperacionesInterface 
                 }
             }
 
-            return operaciones.get(0).obtenerNumero();
+            return operaciones.get(0);
         }
         return -1;
-    }
-
-    private interface INodo {
-        int obtenerNumero();
-    }
-
-    private static abstract class NodoOperacion implements INodo {
-        protected INodo mOperandoA;
-        protected INodo mOperandoB;
-
-        protected NodoOperacion(INodo operandoA, INodo operandoB) {
-            mOperandoA = operandoA;
-            mOperandoB = operandoB;
-        }
-
-    }
-
-    private static class NodoOperadorDivision extends NodoOperacion {
-
-        protected NodoOperadorDivision(INodo operandoA, INodo operandoB) {
-            super(operandoA, operandoB);
-        }
-
-        @Override
-        public int obtenerNumero() {
-            return mOperandoA.obtenerNumero() / mOperandoB.obtenerNumero();
-        }
-
-    }
-
-    private static class NodoOperadorMultiplicacion extends NodoOperacion {
-
-        protected NodoOperadorMultiplicacion(INodo operandoA, INodo operandoB) {
-            super(operandoA, operandoB);
-        }
-
-        @Override
-        public int obtenerNumero() {
-            return mOperandoA.obtenerNumero() * mOperandoB.obtenerNumero();
-        }
-
-    }
-
-    private static class NodoOperadorSuma extends NodoOperacion {
-
-        protected NodoOperadorSuma(INodo operandoA, INodo operandoB) {
-            super(operandoA, operandoB);
-        }
-
-        @Override
-        public int obtenerNumero() {
-            return mOperandoA.obtenerNumero() + mOperandoB.obtenerNumero();
-        }
-
-    }
-
-    private static class NodoOperadorResta extends NodoOperacion {
-
-        protected NodoOperadorResta(INodo operandoA, INodo operandoB) {
-            super(operandoA, operandoB);
-        }
-
-        @Override
-        public int obtenerNumero() {
-            return mOperandoA.obtenerNumero() - mOperandoB.obtenerNumero();
-        }
-
-    }
-
-    private static class NodoOperando implements INodo {
-
-        int mValor;
-
-        public NodoOperando(int valor) {
-            mValor = valor;
-        }
-
-        @Override
-        public int obtenerNumero() {
-            return mValor;
-        }
     }
 }
