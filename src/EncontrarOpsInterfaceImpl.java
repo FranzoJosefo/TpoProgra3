@@ -1,44 +1,45 @@
 import java.util.ArrayList;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 
 public class EncontrarOpsInterfaceImpl implements EncontrarOperacionesInterface {
-    ScriptEngineManager mgr = new ScriptEngineManager();
-    ScriptEngine engine = mgr.getEngineByName("JavaScript");
-
 
     @Override
     public ArrayList<String> obtenerOperaciones(ArrayList<Integer> numeros, ArrayList<Operadores> operadores, int cantNum, int resultadoABuscar) {
+        if(cantNum < operadores.size() + 1 || numeros.size() < operadores.size() + 1) {
+            return null;
+        }
+        //TODO reducir el array Numeros acorde a cantNum
         return obtenerOperaciones(numeros, operadores, resultadoABuscar, "", new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
     }
 
-    private static ArrayList<String> obtenerOperaciones(ArrayList<Integer> numeros, ArrayList<Operadores> operadores, int resultadoEsperado, String expresion, ArrayList<String> resultadoFinal, ArrayList<Operadores> operadoresSolucion, ArrayList<Integer> operandosSolucion) {
-        if(numeros.size() <= operadores.size()) {
+    private static ArrayList<String> obtenerOperaciones(ArrayList<Integer> numeros,
+                                                        ArrayList<Operadores> operadores,
+                                                        int resultadoEsperado,
+                                                        String expresion,
+                                                        ArrayList<String> resultadoFinal,
+                                                        ArrayList<Operadores> operadoresSolucion,
+                                                        ArrayList<Integer> operandosSolucion) {
+        if (numeros.size() <= operadores.size()) {
             return null;
         }
         if (operadores.isEmpty()) { //Si ya no quedan operadores que visitar, no puedo seguir generando expresion - Caso Base 1
             ArrayList<Integer> operandosSolucionAux = new ArrayList<>(operandosSolucion);
             operandosSolucionAux.add(numeros.get(0));
             String nuevaExpresion = expresion + numeros.get(0);
+            System.out.println("nueva expresoion: " + nuevaExpresion);
             numeros.remove(0); // Saco el numero ya revisado.
             if (evaluarExpresion(operadoresSolucion, operandosSolucionAux) == resultadoEsperado) {
-                System.out.println("Expresion valida agregada: " + nuevaExpresion);
                 resultadoFinal.add(nuevaExpresion);
-            } else {
-                System.out.println("Expresion no valida:" + nuevaExpresion);
             }
         }
         for (int i = 0; i < numeros.size(); i++) {
             int numeroActual = numeros.get(i);
             if (operadores.isEmpty()) { //Checkeo si es el ultimo caso de operador
                 String nuevaExpresion = expresion + numeroActual;
+                System.out.println("nueva expresoion: " + nuevaExpresion);
                 ArrayList<Integer> operandosSolucionAux = new ArrayList<>(operandosSolucion);
                 operandosSolucionAux.add(numeros.get(0));
                 if (evaluarExpresion(operadoresSolucion, operandosSolucionAux) == resultadoEsperado) {
-                    System.out.println("Expresion valida agregada: " + nuevaExpresion);
                     resultadoFinal.add(nuevaExpresion);
-                } else {
-                    System.out.println("Expresion no valida:" + nuevaExpresion);
                 }
             } else { //Todavia quedan operadores
                 for (int j = 0; j < operadores.size(); j++) {
@@ -53,46 +54,17 @@ public class EncontrarOpsInterfaceImpl implements EncontrarOperacionesInterface 
                     ArrayList<Integer> operandosSolucionAux = new ArrayList<>(operandosSolucion);
                     operandosSolucionAux.add(numeroActual);
 
-                    //si es el ultimo operador que voy a agregar, antes de checkearlo, podria verificar si ya llegue al resultado. Si estoy en 10, ya sea que hago DIV/MULTI/RESTA/etc (evaluar cada caso) deberia cortar!.
-                    if (restoOperadores.size() == 1) { //TODO REVISAR BIEN ESTO, PERO CREO QUE ESTA BIEN! - PODA
-                        if (evaluarExpresion(operadoresSolucion, operandosSolucionAux) == resultadoEsperado && !restoOperadores.isEmpty() && !restoNumeros.isEmpty()) { //Poda, si ya llegue parcialmente al resultadoEsperado
-                            Operadores operadorSiguiente = restoOperadores.get(0);
-                            if (restoNumeros.size() == 1) { //Ultimo numero disponible a revisar
-                                Integer numeroSiguiente = restoNumeros.get(0);
-                                if (validarProximaOperacion(operadorSiguiente, numeroSiguiente)) {
-                                    System.out.println("PODO no pruebo las siguientes");
-                                    return resultadoFinal;
-                                }
-                            } else {
-                                Integer numeroSiguiente = restoNumeros.get(0);
-                                if (validarProximaOperacion(operadorSiguiente, numeroSiguiente)) { //Quedan otros numeros por revisar
-                                    System.out.println("PODO parcial, no pruebo el numero siguiente.");
-                                    restoNumeros.remove(0);
-                                }
-                            }
-                        }
-                    }
-
                     ArrayList<Operadores> operadoresSolucionAux = new ArrayList<>(operadoresSolucion);
                     operadoresSolucionAux.add(operadores.get(j));
 
                     String nuevaExpresion = expresion + numeroActual + operator;
+                    System.out.println("nueva expresoion: " + nuevaExpresion);
 
-                    System.out.println("Llamada recursiva nueva Expresion es:"+nuevaExpresion);
                     obtenerOperaciones(restoNumeros, restoOperadores, resultadoEsperado, nuevaExpresion, resultadoFinal, operadoresSolucionAux, operandosSolucionAux); // Crece en profundidad para buscar la proxima combinacion.
-                    System.out.println("Salgo llamada recursiva Expresion es:"+expresion);
-
                 }
             }
         }
         return resultadoFinal;
-    }
-
-    private static boolean validarProximaOperacion(Operadores operadorSiguiente, Integer numeroSiguiente) {
-        return operadorSiguiente == Operadores.SUMA && numeroSiguiente > 0
-                || operadorSiguiente == Operadores.MULTI && numeroSiguiente > 1
-                || operadorSiguiente == Operadores.DIV && numeroSiguiente != 1
-                || operadorSiguiente == Operadores.RESTA && numeroSiguiente > 0;
     }
 
     private static String getOperadorChar(Operadores operador) {
@@ -118,70 +90,145 @@ public class EncontrarOpsInterfaceImpl implements EncontrarOperacionesInterface 
         return operator;
     }
 
-    private static int evaluateExpression(String expression) { //Adaptar esto, para que la expresion se evalue via 2 listas y un switch. o(n)
-        javax.script.ScriptEngineManager manager = new javax.script.ScriptEngineManager();
-        javax.script.ScriptEngine engine = manager.getEngineByName("js");
-        try {
-            return (int) engine.eval(expression);
-        } catch (javax.script.ScriptException e) {
-            e.printStackTrace();
+    private static int evaluarExpresion(ArrayList<Operadores> operadores, ArrayList<Integer> operandos) { //2*4+8/1-5 - *, +, -, - // Operandos: 2,3,
+        if (operandos.size() == operadores.size() + 1) {
+
+
+            ArrayList<INodo> operaciones = new ArrayList<>(); //2, 4, 8, 1, 5
+            for (Integer operando : operandos) {
+                operaciones.add(new NodoOperando(operando));
+            }
+            int i = 0;
+            while (i < operadores.size()) { // NodoMulti, NodoDivi, 5
+                switch (operadores.get(i)) {
+                    case MULTI: {
+                        INodo operandoA = operaciones.remove(i);
+                        INodo operandoB = operaciones.remove(i);
+                        operadores.remove(i);
+                        operaciones.add(i, new NodoOperadorMultiplicacion(operandoA, operandoB));
+                        break;
+                    }
+                    case DIV: {
+                        INodo operandoA = operaciones.remove(i);
+                        INodo operandoB = operaciones.remove(i);
+                        operadores.remove(i);
+                        operaciones.add(i, new NodoOperadorDivision(operandoA, operandoB));
+                        break;
+                    }
+                    default: {
+                        i++;
+                        break;
+                    }
+                }
+            }
+
+            i = 0;
+            while (i < operadores.size()) { // K = o(2*n) donde n son los operadores. Peor caso es all SUMA y RESTA porque entra las 2 veces con la misma cantidad de operadores. El 2 -> lo saco me queda o(n) entonces K = 1
+                switch (operadores.get(i)) {
+                    case SUMA: {
+                        INodo operandoA = operaciones.remove(i);
+                        INodo operandoB = operaciones.remove(i);
+                        operadores.remove(i);
+                        operaciones.add(i, new NodoOperadorSuma(operandoA, operandoB));
+                        break;
+                    }
+                    case RESTA: {
+                        INodo operandoA = operaciones.remove(i);
+                        INodo operandoB = operaciones.remove(i);
+                        operadores.remove(i);
+                        operaciones.add(i, new NodoOperadorResta(operandoA, operandoB));
+                        break;
+                    }
+                    default: {
+                        i++;
+                        break;
+                    }
+                }
+            }
+
+            return operaciones.get(0).obtenerNumero();
         }
         return -1;
     }
 
-    //operadores = SUMA, RESTA
-    //Operandos = 3, 5, 6
-    private static int evaluarExpresion(ArrayList<Operadores> operadores, ArrayList<Integer> operandos) {
-        if (operandos.size() == operadores.size() + 1) {
-            ArrayList<Operadores> subCalculoOperadores = new ArrayList<>();
-            ArrayList<Integer> subCalculoOperandos = new ArrayList<>();
-
-            ArrayList<Operadores> auxiliarOperadores = new ArrayList<>(operadores);
-            ArrayList<Integer> auxiliarOperandos = new ArrayList<>(operandos);
-            for (int i = 0; i < operadores.size(); i++) {
-                Operadores operadorActual = operadores.get(i);
-                if (operadorActual == Operadores.MULTI || operadorActual == Operadores.DIV) {
-                    subCalculoOperadores.add(operadorActual);
-                    auxiliarOperadores.remove(i);
-
-                    subCalculoOperandos.add(operandos.get(i));
-                    auxiliarOperandos.remove(i);
-                    subCalculoOperandos.add(operandos.get(i+1));
-                    auxiliarOperandos.remove(i);
-                    auxiliarOperandos.add(i, realizarCalculo(subCalculoOperadores, subCalculoOperandos));
-                }
-            }
-
-            return realizarCalculo(auxiliarOperadores, auxiliarOperandos);
-        } else {
-            return -1;
-        }
+    private interface INodo {
+        int obtenerNumero();
     }
 
-    private static int realizarCalculo(ArrayList<Operadores> operadores, ArrayList<Integer> operandos) {
-        int result = operandos.get(0);
-        operandos.remove(0);
-        //Si tiene MULTI o DIV   [4 + 2 * 3 - 2 / 5] [4,2,3,2,5] [SUMA,MULTI,RESTA,DIV]
-        for (int i = 0; i < operadores.size(); i++) {
-            switch (operadores.get(i)) {
-                case SUMA: {
-                    result = result + operandos.get(i);
-                    break;
-                }
-                case MULTI: {
-                    result = result * operandos.get(i);
-                    break;
-                }
-                case DIV: {
-                    result = result / operandos.get(i);
-                    break;
-                }
-                case RESTA: {
-                    result = result - operandos.get(i);
-                    break;
-                }
-            }
+    private static abstract class NodoOperacion implements INodo {
+        protected INodo mOperandoA;
+        protected INodo mOperandoB;
+
+        protected NodoOperacion(INodo operandoA, INodo operandoB) {
+            mOperandoA = operandoA;
+            mOperandoB = operandoB;
         }
-        return result;
+
+    }
+
+    private static class NodoOperadorDivision extends NodoOperacion {
+
+        protected NodoOperadorDivision(INodo operandoA, INodo operandoB) {
+            super(operandoA, operandoB);
+        }
+
+        @Override
+        public int obtenerNumero() {
+            return mOperandoA.obtenerNumero() / mOperandoB.obtenerNumero();
+        }
+
+    }
+
+    private static class NodoOperadorMultiplicacion extends NodoOperacion {
+
+        protected NodoOperadorMultiplicacion(INodo operandoA, INodo operandoB) {
+            super(operandoA, operandoB);
+        }
+
+        @Override
+        public int obtenerNumero() {
+            return mOperandoA.obtenerNumero() * mOperandoB.obtenerNumero();
+        }
+
+    }
+
+    private static class NodoOperadorSuma extends NodoOperacion {
+
+        protected NodoOperadorSuma(INodo operandoA, INodo operandoB) {
+            super(operandoA, operandoB);
+        }
+
+        @Override
+        public int obtenerNumero() {
+            return mOperandoA.obtenerNumero() + mOperandoB.obtenerNumero();
+        }
+
+    }
+
+    private static class NodoOperadorResta extends NodoOperacion {
+
+        protected NodoOperadorResta(INodo operandoA, INodo operandoB) {
+            super(operandoA, operandoB);
+        }
+
+        @Override
+        public int obtenerNumero() {
+            return mOperandoA.obtenerNumero() - mOperandoB.obtenerNumero();
+        }
+
+    }
+
+    private static class NodoOperando implements INodo {
+
+        int mValor;
+
+        public NodoOperando(int valor) {
+            mValor = valor;
+        }
+
+        @Override
+        public int obtenerNumero() {
+            return mValor;
+        }
     }
 }

@@ -10,6 +10,10 @@ public class PrincipalEncontrarOperaciones {
         numeros.add(3);
         numeros.add(4);
         numeros.add(5);
+        numeros.add(105);
+        numeros.add(8);
+        numeros.add(1);
+//        numeros.add(1);
 //        numeros.add(1);
 
 //        numeros.add(12);
@@ -19,7 +23,10 @@ public class PrincipalEncontrarOperaciones {
         ArrayList<Operadores> operadores = new ArrayList<Operadores>();
         operadores.add(Operadores.SUMA);
         operadores.add(Operadores.MULTI);
+        operadores.add(Operadores.RESTA);
+        operadores.add(Operadores.RESTA);
 //        operadores.add(Operadores.SUMA);
+//        operadores.add(Operadores.DIV);
         int cantNum = 4;
         int resultadoABuscar = 10;
         ArrayList<String> resultado = operaciones.obtenerOperaciones(numeros, operadores, cantNum, resultadoABuscar);
