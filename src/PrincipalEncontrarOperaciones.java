@@ -5,31 +5,38 @@ public class PrincipalEncontrarOperaciones {
     public static void main(String[] args) {
         // TODO Auto-generated method stub
         EncontrarOpsInterfaceImpl operaciones = new EncontrarOpsInterfaceImpl();
-        ArrayList<Integer> numeros = new ArrayList<Integer>();
+        ArrayList<Integer> numeros = new ArrayList<Integer>(); //2,3,4,5,10,9,1,8
         numeros.add(2);
         numeros.add(3);
         numeros.add(4);
         numeros.add(5);
-        numeros.add(105);
+        numeros.add(6);
         numeros.add(8);
-        numeros.add(1);
-//        numeros.add(1);
-//        numeros.add(1);
 
-//        numeros.add(12);
-//        numeros.add(1);
-//        numeros.add(6);
 
         ArrayList<Operadores> operadores = new ArrayList<Operadores>();
         operadores.add(Operadores.SUMA);
-        operadores.add(Operadores.MULTI);
-        operadores.add(Operadores.RESTA);
-        operadores.add(Operadores.RESTA);
+        operadores.add(Operadores.SUMA);
+        operadores.add(Operadores.SUMA);
+        operadores.add(Operadores.SUMA);
+        operadores.add(Operadores.SUMA);
+
 //        operadores.add(Operadores.SUMA);
+//        operadores.add(Operadores.MULTI);
+////        operadores.add(Operadores.RESTA);
+//        operadores.add(Operadores.SUMA);
+//        operadores.add(Operadores.RESTA);
+//
 //        operadores.add(Operadores.DIV);
-        int cantNum = 4;
-        int resultadoABuscar = 10;
+//        operadores.add(Operadores.MULTI);
+//        operadores.add(Operadores.SUMA);
+
+
+        int cantNum = 8;
+        int resultadoABuscar = 1;
+        long start = System.currentTimeMillis();
         ArrayList<String> resultado = operaciones.obtenerOperaciones(numeros, operadores, cantNum, resultadoABuscar);
+
 
         if (resultado != null) {
             int i = 0;
@@ -42,5 +49,8 @@ public class PrincipalEncontrarOperaciones {
         else {
             System.out.println("El resultado arrojado es nulo");
         }
+
+        long end = System.currentTimeMillis();
+        System.out.println("Tiempo de ejecucion en mili-segundos: "+ (end-start));
     }
 }

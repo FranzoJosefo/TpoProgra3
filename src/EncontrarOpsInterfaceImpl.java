@@ -7,14 +7,15 @@ public class EncontrarOpsInterfaceImpl implements EncontrarOperacionesInterface 
         if (cantNum < operadores.size() + 1 || numeros.size() < operadores.size() + 1) {
             return null;
         }
-        //Consideramos que cantNum reducira el tamaño del array numeros original, en caso de que este sea mayor.
-        if (numeros.size() > cantNum) {
-            ArrayList<Integer> numerosFiltrados = new ArrayList<Integer>();
-            for (int i = 0; i < cantNum; i++) {
-                numerosFiltrados.add(numeros.get(i));
-            }
-            return obtenerOperaciones(numerosFiltrados, operadores, resultadoABuscar, "", new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-        }
+//        //Consideramos que cantNum reducira el tamaño del array numeros original, en caso de que este sea mayor.
+//        if (numeros.size() > cantNum) {
+//            ArrayList<Integer> numerosFiltrados = new ArrayList<>();
+//            for (int i = 0; i < cantNum; i++) {
+//                numerosFiltrados.add(numeros.get(i));
+//            }
+//
+//            return obtenerOperaciones(numerosFiltrados, operadores, resultadoABuscar, "", new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+//        }
         return obtenerOperaciones(numeros, operadores, resultadoABuscar, "", new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
     }
 
@@ -34,7 +35,7 @@ public class EncontrarOpsInterfaceImpl implements EncontrarOperacionesInterface 
             String nuevaExpresion = expresion + numeros.get(0);
             System.out.println("nueva expresoion: " + nuevaExpresion);
             numeros.remove(0); // Saco el numero ya revisado.
-            if (evaluarExpresions(operadoresSolucion, operandosSolucionAux) == resultadoEsperado) {
+            if (evaluarExpresion(operadoresSolucion, operandosSolucionAux) == resultadoEsperado) {
                 resultadoFinal.add(nuevaExpresion);
             }
         }
@@ -42,10 +43,10 @@ public class EncontrarOpsInterfaceImpl implements EncontrarOperacionesInterface 
             int numeroActual = numeros.get(i);
             if (operadores.isEmpty()) { //Checkeo si es el ultimo caso de operador
                 String nuevaExpresion = expresion + numeroActual;
-                System.out.println("nueva expresoion: " + nuevaExpresion);
+                System.out.println("nueva expresion: " + nuevaExpresion);
                 ArrayList<Integer> operandosSolucionAux = new ArrayList<>(operandosSolucion);
                 operandosSolucionAux.add(numeros.get(0));
-                if (evaluarExpresions(operadoresSolucion, operandosSolucionAux) == resultadoEsperado) {
+                if (evaluarExpresion(operadoresSolucion, operandosSolucionAux) == resultadoEsperado) {
                     resultadoFinal.add(nuevaExpresion);
                 }
             } else { //Todavia quedan operadores
@@ -64,10 +65,28 @@ public class EncontrarOpsInterfaceImpl implements EncontrarOperacionesInterface 
                     ArrayList<Operadores> operadoresSolucionAux = new ArrayList<>(operadoresSolucion);
                     operadoresSolucionAux.add(operadores.get(j));
 
-                    String nuevaExpresion = expresion + numeroActual + operator;
-                    System.out.println("nueva expresoion: " + nuevaExpresion);
+                    boolean operadorDisminuye = false;
 
-                    obtenerOperaciones(restoNumeros, restoOperadores, resultadoEsperado, nuevaExpresion, resultadoFinal, operadoresSolucionAux, operandosSolucionAux); // Crece en profundidad para buscar la proxima combinacion.
+                    for (Operadores operador : restoOperadores) {
+                        if (operador == Operadores.DIV || operador == Operadores.RESTA) {
+                            operadorDisminuye = true;
+                            break;
+                        }
+                    }
+
+                    String nuevaExpresion = expresion + numeroActual + operator;
+                    System.out.println("nueva expresion: " + nuevaExpresion);
+
+                    if(operadorDisminuye) {
+                        obtenerOperaciones(restoNumeros, restoOperadores, resultadoEsperado, nuevaExpresion, resultadoFinal, operadoresSolucionAux, operandosSolucionAux); // Crece en profundidad para buscar la proxima combinacion.
+                    } else {
+                        if (evaluarExpresion(operadoresSolucion, operandosSolucionAux) < resultadoEsperado) {
+                            obtenerOperaciones(restoNumeros, restoOperadores, resultadoEsperado, nuevaExpresion, resultadoFinal, operadoresSolucionAux, operandosSolucionAux); // Crece en profundidad para buscar la proxima combinacion.
+                        } else {
+                            System.out.println("Podando: " + nuevaExpresion);
+                        }
+                    }
+
                 }
             }
         }
@@ -97,9 +116,9 @@ public class EncontrarOpsInterfaceImpl implements EncontrarOperacionesInterface 
         return operator;
     }
 
-    private static int evaluarExpresions(ArrayList<Operadores> operadores, ArrayList<Integer> operandos) {
+    private static int evaluarExpresion(ArrayList<Operadores> operadores, ArrayList<Integer> operandos) {
         if (operandos.size() == operadores.size() + 1) {
-            ArrayList<Integer> operaciones = new ArrayList<>(operandos); // Copy operandos to operaciones
+            ArrayList<Integer> operaciones = new ArrayList<>(operandos);
             int i = 0;
             while (i < operadores.size()) {
                 switch (operadores.get(i)) {
